@@ -2,19 +2,9 @@ import pandas as pd
 import gradio as gr
 from typing import List
 
-# Setting the precision of numbers to 2 decimal places
-# s = df.style.format("{:.2f}")
-
-def greet(df):
-    df = pd.DataFrame({
-    "A" : [14.12345, 4.23456, 5.34567, 4.45678, 1.56789], 
-    "B" : [5.67891, 2.78912, 54.89123, 3.91234, 2.12345], 
-    # ... other columns
-    }) 
-    return df
-
 def filter_records(records, name):
-    return records.loc[records['name'] == name]
+    return records
+
 
 def call_feast(user_id: str, features:List): 
     """ implement Feast 호출"""
@@ -89,7 +79,6 @@ def get_user_data(user_id, features):
 
     return df
 
-import gradio as gr
 
 def get_retrieved_data(user_id):
     features = ['event_ids_score', 'event_ids', 'event_description']
