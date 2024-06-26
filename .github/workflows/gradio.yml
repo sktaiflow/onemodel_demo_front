@@ -32,7 +32,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: ap-northeast-2
-          role-to-assume: ${{secrets.OIDC_ROLE_TO_ASSUME}}
+          role-to-assume: ${{ secrets.OIDC_ROLE_TO_ASSUME }}
           role-session-name: OIDCSession # 추가 (oidc)
           role-duration-seconds: 3600 # 추가 (oidc)
           
