@@ -1,0 +1,53 @@
+name: Deploy Gradio Client
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target Environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - develop
+          - master 
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v4
+        
+      - name: Checkout python version
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      
+      - name: Configure AWS STG credentials
+        if: ${{ inputs.environment == 'stg' }}
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: ap-northeast-2
+          role-to-assume: ${{secrets.OIDC_ROLE_TO_ASSUME}}
+          role-session-name: OIDCSession # 추가 (oidc)
+          role-duration-seconds: 3600 # 추가 (oidc)
+          
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build and deploy
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          SERVICE_NAME: "onemodelv3-offering-front"
+          STACK_TYPE: ${{ inputs.environment }}
+          VERSION: ${{ inputs.version }}
+        run: |
+            echo $LATEST_TAG
+            docker build -f ./onemodel_v3/Dockerfile --build-arg VERSION=$VERSION -t $ECR_REGISTRY/$SERVICE_NAME:latest .
+            docker push -a $ECR_REGISTRY/$SERVICE_NAME
